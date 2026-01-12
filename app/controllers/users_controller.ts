@@ -21,24 +21,39 @@ export default class UsersController {
   }
 
 
-  async show({ params }: HttpContext) {
-    const user = await User.findBy('id', params.id)
-    return user
+  async show({ params, response }: HttpContext) {
+    try {
+      const user = await User.findByOrFail('id', params.id)
+      return user
+    } catch (error) {
+     return response.status(404).json({message: 'Usuário não encontrado'}) 
+    }
+
   }
 
  
-  async update({ params, request }: HttpContext) {
-    const user = await User.findBy('id', params.id)
-    const {name,password} = await request.validateUsing(updateUserValidator)
-    user?.merge({name,password})
-    await user?.save()
-    return user
+  async update({ params, request, response }: HttpContext) {
+
+
+    try {
+      const user = await User.findByOrFail('id', params.id)
+      const {name,password} = await request.validateUsing(updateUserValidator)
+      user?.merge({name,password})
+      await user?.save()
+      return user
+    } catch (error) {
+      return response.status(404).json({message: 'Usuário não encontrado'})
+    }
   }
 
 
   async destroy({ params, response }: HttpContext) {
+    try {
     const user = await User.findBy('id', params.id)
     await user?.delete()
     return response.status(203)
+  } catch (error) {
+    return response.status(404).json({message: 'Usuário não encontrado'})
+  }
   }
 }

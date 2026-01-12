@@ -8,7 +8,7 @@ export const createUserValidator = vine.compile(
         .email()
         .normalizeEmail()
         .unique(async(db, value)=>{
-            const match = await db.from('users').select('email', value).first()
+            const match = await db.from('users').select('id').where('email', value).first()
             return !match
         }),
         password: vine.string().minLength(6),
@@ -18,7 +18,7 @@ export const createUserValidator = vine.compile(
 
 export const updateUserValidator = vine.compile(
     vine.object({
-        name: vine.string().minLength(3),
-        password: vine.string().minLength(6),
+        name: vine.string().minLength(3).optional(),
+        password: vine.string().minLength(6).optional(),
     })
 )
