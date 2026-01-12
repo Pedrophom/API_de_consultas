@@ -1,10 +1,13 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import consultation from '#models/consultation'
+import User from '#models/user'
 export default class ConsultasController {
 
   async store({ request,auth }: HttpContext) {
-    const user = auth.user!
-
+    const user = auth.user as User
+    if (!user){
+      return { error: 'Usuário não autenticado.' }
+    }
     if(user.tipo !== 'paciente'){
       return { error: 'Apenas pacientes podem agendar consultas.' }
     }
@@ -32,8 +35,12 @@ export default class ConsultasController {
 
    public async destroy({ auth, params }: HttpContext) {
     const consulta = await consultation.findOrFail(params.id)
-
-    if (consulta.patientId !== auth.user!.id) {
+    if (!auth.user) {
+      return { erro: 'Usuário não autenticado' }
+    }
+    
+    const user = auth.user as User
+    if (consulta.patientId !== user.id) {
       return { erro: 'Não autorizado' }
     }
 
